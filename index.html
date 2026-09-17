@@ -69,6 +69,38 @@
       background: rgba(255,255,255,0.1);
     }
   </style>
+  <style>
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: rgba(10,10,15,0.95);
+      border: 1px solid rgba(59,130,246,0.4);
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-size: 14px;
+      z-index: 9999;
+      max-width: 90vw;
+      text-align: center;
+      opacity: 0;
+      transition: all 0.4s ease;
+      pointer-events: none;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(59,130,246,0.15);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+    .toast .toast-title {
+      font-weight: 700;
+      color: #60a5fa;
+      margin-bottom: 4px;
+    }
+  </style>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%233b82f6'/%3E%3Ctext x='50%25' y='68' font-size='55' font-family='Arial' fill='%23fff' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E" />
 </head>
 <body class="antialiased relative text-slate-100">
@@ -374,7 +406,7 @@
         <span class="text-slate-300">I confirm that I understand this is a <strong class="text-white">premium paid consultation</strong> and agree to the professional advisory fee.</span>
       </label>
 
-      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-black font-semibold py-2.5 rounded-lg transition shadow-lg shadow-blue-500/30">
+      <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-black font-semibold py-2.5 rounded-lg transition shadow-lg shadow-blue-500/30 disabled:opacity-50">
         Schedule Paid Advisory Session
       </button>
     </form>
@@ -475,8 +507,31 @@
       prev.push(data)
       store.set('consultations', prev)
       alert(`Thank you, ${data.fullName}. Your paid consultation request for "${data.service}" to ${data.destination} has been recorded. Our team will contact you at ${data.phone} within 24 hours.`)
+      const btn = document.getElementById('submit-btn')
+      btn.disabled = true
+      btn.textContent = 'Sending...'
+
+      showToast('Consultation Request Sent', `Hi ${data.fullName}, your paid session for "${data.service}" → ${data.destination} is recorded. We'll reach you at ${data.phone} within 24 hrs.`)
+
+      setTimeout(() => {
+        btn.disabled = false
+        btn.textContent = 'Schedule Paid Advisory Session'
+      }, 1500)
+
       form.reset()
     })
+  }
+
+  function showToast(title, msg) {
+    let t = document.createElement('div')
+    t.className = 'toast'
+    t.innerHTML = '<div class="toast-title">' + title + '</div><div>' + msg + '</div>'
+    document.body.appendChild(t)
+    requestAnimationFrame(() => t.classList.add('show'))
+    setTimeout(() => {
+      t.classList.remove('show')
+      setTimeout(() => t.remove(), 400)
+    }, 5000)
   }
 
   // Scroll reveal for cards
